@@ -1,0 +1,426 @@
+openapi: 3.0.0
+
+info:
+  title: Checkout Service API
+  license:
+    name: Apache 2.0
+    url: www.apache.org/licenses/LICENSE-2.0.html
+  description: An API that exposes checkout functionality
+  contact:
+    name: David Molinero
+    url: https://github.com/doktor500
+    email: davidmolinero.com@gmail.com
+  version: 1.0.0
+
+servers:
+  - url: https://api.kenfos.co.uk
+    description: Production environment
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+
+  schemas:
+    Id:
+      type: string
+      minLength: 1
+      maxLength: 36
+
+    Amount:
+      type: object
+      properties:
+        amount:
+          type: number
+          example: 99.99
+        currency:
+          type: string
+          example: EUR
+          enum:
+            - EUR
+      required:
+        - amount
+        - currency
+      additionalProperties: false
+
+    Address:
+      type: object
+      properties:
+        country:
+          type: string
+          example: Spain
+        city:
+          type: string
+          example: Madrid
+        postCode:
+          type: string
+          example: "28000"
+        line1:
+          type: string
+          example: Gran via 1
+        line2:
+          type: string
+          example: Portal A
+      required:
+        - country
+        - city
+        - postCode
+        - line1
+      additionalProperties: false
+
+    ShippingMethodRequest:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+      example:
+        id: a675fe92-4c06-41a0-a159-bbd19d3a8411
+      required:
+        - id
+      additionalProperties: false
+
+    ShippingMethod:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+        carrier:
+          type: string
+          enum:
+            - UPS
+          example: UPS
+        price:
+          $ref: "#/components/schemas/Amount"
+      example:
+        id: 096c4bf1-fc8d-47f9-b877-038a2ea29898
+        carrier: UPS
+        price:
+          amount: 9.99
+          currency: EUR
+      required:
+        - id
+        - carrier
+        - price
+      additionalProperties: false
+
+    ShoppingCartItemRequest:
+      type: object
+      description: A shopping cart item
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+        quantity:
+          type: number
+          example: 1
+      example:
+        id: c8991868-eb34-4148-bc48-8a19c9294d6b
+        quantity: 1
+      required:
+        - id
+        - quantity
+      additionalProperties: false
+
+    ShoppingCartItemsRequest:
+      type: array
+      items:
+        $ref: "#/components/schemas/ShoppingCartItemRequest"
+
+    ShippingMethodsResponse:
+      type: array
+      description: A list of shipping methods
+      items:
+        $ref: "#/components/schemas/ShippingMethod"
+
+    ShoppingCartResponse:
+      type: object
+      description: A shopping cart
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ShoppingCartItemResponse"
+      example:
+        id: aec8b64c-2c49-49cb-8f4c-3b62fb9ce76c
+        items:
+          - id: cc3cb762-2ccb-4219-b2a9-ad6653d144d2
+            quantity: 1
+            name: Nike Dunk Low Black and White
+            price:
+              amount: 99.99
+              currency: EUR
+            tax:
+              amount: 19.99
+              currency: EUR
+
+      required:
+        - id
+        - items
+      additionalProperties: false
+
+    ShoppingCartItemResponse:
+      type: object
+      description: A shopping cart item
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+        quantity:
+          type: number
+        name:
+          type: string
+        price:
+          $ref: "#/components/schemas/Amount"
+        tax:
+          $ref: "#/components/schemas/Amount"
+      example:
+        id: 5cae5f24-5058-417b-ac9f-68641ed5ad7a
+        quantity: 1
+        name: Nike Dunk Low Black and White
+        price:
+          amount: 99.99
+          currency: EUR
+        tax:
+          amount: 19.99
+          currency: EUR
+      required:
+        - id
+        - quantity
+        - name
+        - price
+        - tax
+      additionalProperties: false
+
+    BadRequestError:
+      type: object
+      description: An error that is thrown when an the request is invalid
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: The request failed validation
+      additionalProperties: false
+
+    UnexpectedError:
+      type: object
+      description: An error that is thrown when something unexpected happens
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: An unexpected error has occurred
+      additionalProperties: false
+
+    TimeoutError:
+      type: object
+      description: An errors that is thrown when the service times out
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: The request timed out
+      additionalProperties: false
+
+  responses:
+    NoContent:
+      description: A response containing no content in the response body from a create/delete request
+
+    ShippingMethodsResponse:
+      description: A response containing a list of shipping methods
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ShippingMethodsResponse"
+
+    ShoppingCartResponse:
+      description: A response containing a shopping cart
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ShoppingCartResponse"
+
+    BadRequestError:
+      description: A response containing an error when the request is invalid
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/BadRequestError"
+
+    UnexpectedError:
+      description: A response containing an error when something unexpected has happened
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UnexpectedError"
+
+    TimeoutError:
+      description: A response containing an error when the request times out
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TimeoutError"
+
+paths:
+  /api/checkout/cart:
+    post:
+      description: Create shopping cart
+      operationId: create-shopping-cart
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShoppingCartItemsRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/ShoppingCartResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "500":
+          $ref: "#/components/responses/UnexpectedError"
+        "504":
+          $ref: "#/components/responses/TimeoutError"
+
+    get:
+      description: Get shopping cart
+      operationId: get-shopping-cart
+      security:
+        - ApiKeyAuth: [ ]
+      responses:
+        "200":
+          $ref: "#/components/responses/ShoppingCartResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "500":
+          $ref: "#/components/responses/UnexpectedError"
+        "504":
+          $ref: "#/components/responses/TimeoutError"
+
+  /api/checkout/cart/{cartId}/items:
+    post:
+      description: Add shopping cart items
+      operationId: add-shopping-cart-items
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: cartId
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShoppingCartItemsRequest"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "500":
+          $ref: "#/components/responses/UnexpectedError"
+        "504":
+          $ref: "#/components/responses/TimeoutError"
+
+    delete:
+      description: Delete shopping cart items
+      operationId: delete-shopping-cart-items
+      security:
+        - ApiKeyAuth: [ ]
+      parameters:
+        - in: path
+          name: cartId
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShoppingCartItemsRequest"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "500":
+          $ref: "#/components/responses/UnexpectedError"
+        "504":
+          $ref: "#/components/responses/TimeoutError"
+
+  /api/checkout/cart/{cartId}/shippingAddress:
+    post:
+      description: Add shipping address
+      operationId: add-shipping-address
+      security:
+          - ApiKeyAuth: [ ]
+      parameters:
+        - in: path
+          name: cartId
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Address"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "500":
+          $ref: "#/components/responses/UnexpectedError"
+        "504":
+          $ref: "#/components/responses/TimeoutError"
+
+  /api/checkout/shippingMethods:
+    get:
+      description: Get shipping methods
+      operationId: get-shipping-methods
+      security:
+        - ApiKeyAuth: [ ]
+      responses:
+        "200":
+          $ref: "#/components/responses/ShippingMethodsResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "500":
+          $ref: "#/components/responses/UnexpectedError"
+        "504":
+          $ref: "#/components/responses/TimeoutError"
+
+  /api/checkout/cart/{cartId}/shippingMethod:
+    post:
+      description: Add shipping method
+      operationId: add-shipping-method
+      security:
+        - ApiKeyAuth: [ ]
+      parameters:
+        - in: path
+          name: cartId
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShippingMethodRequest"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "500":
+          $ref: "#/components/responses/UnexpectedError"
+        "504":
+          $ref: "#/components/responses/TimeoutError"
