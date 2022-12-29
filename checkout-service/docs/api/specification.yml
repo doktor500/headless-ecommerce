@@ -81,30 +81,6 @@ components:
         - id
       additionalProperties: false
 
-    ShippingMethod:
-      type: object
-      properties:
-        id:
-          $ref: "#/components/schemas/Id"
-        carrier:
-          type: string
-          enum:
-            - UPS
-          example: UPS
-        price:
-          $ref: "#/components/schemas/Amount"
-      example:
-        id: 096c4bf1-fc8d-47f9-b877-038a2ea29898
-        carrier: UPS
-        price:
-          amount: 9.99
-          currency: EUR
-      required:
-        - id
-        - carrier
-        - price
-      additionalProperties: false
-
     ShoppingCartItemRequest:
       type: object
       description: A shopping cart item
@@ -126,12 +102,6 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/ShoppingCartItemRequest"
-
-    ShippingMethodsResponse:
-      type: array
-      description: A list of shipping methods
-      items:
-        $ref: "#/components/schemas/ShippingMethod"
 
     ShoppingCartResponse:
       type: object
@@ -229,13 +199,6 @@ components:
   responses:
     NoContent:
       description: A response containing no content in the response body from a create/delete request
-
-    ShippingMethodsResponse:
-      description: A response containing a list of shipping methods
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/ShippingMethodsResponse"
 
     ShoppingCartResponse:
       description: A response containing a shopping cart
@@ -375,22 +338,6 @@ paths:
       responses:
         "204":
           $ref: "#/components/responses/NoContent"
-        "400":
-          $ref: "#/components/responses/BadRequestError"
-        "500":
-          $ref: "#/components/responses/UnexpectedError"
-        "504":
-          $ref: "#/components/responses/TimeoutError"
-
-  /api/checkout/shippingMethods:
-    get:
-      description: Get shipping methods
-      operationId: get-shipping-methods
-      security:
-        - ApiKeyAuth: [ ]
-      responses:
-        "200":
-          $ref: "#/components/responses/ShippingMethodsResponse"
         "400":
           $ref: "#/components/responses/BadRequestError"
         "500":

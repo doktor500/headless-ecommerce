@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  checkout-service-api-docs:
+    image: redocly/redoc
+    volumes:
+      - ./checkout-service/docs/api:/usr/share/nginx/html/api
+    ports:
+      - "8080:80"
+    environment:
+      PAGE_TITLE: "Checkout Service API"
+      SPEC_URL: api/specification.yml
+  shipping-service-api-docs:
+    image: redocly/redoc
+    volumes:
+      - ./shipping-service/docs/api:/usr/share/nginx/html/api
+    ports:
+      - "8081:80"
+    environment:
+      PAGE_TITLE: "Shipping Service API"
+      SPEC_URL: api/specification.yml

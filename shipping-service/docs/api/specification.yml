@@ -1,0 +1,155 @@
+openapi: 3.0.0
+
+info:
+  title: Shipping Service API
+  license:
+    name: Apache 2.0
+    url: www.apache.org/licenses/LICENSE-2.0.html
+  description: An API that exposes shipping functionality
+  contact:
+    name: David Molinero
+    url: https://github.com/doktor500
+    email: davidmolinero.com@gmail.com
+  version: 1.0.0
+
+servers:
+  - url: https://api.kenfos.co.uk
+    description: Production environment
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+
+  schemas:
+    Id:
+      type: string
+      minLength: 1
+      maxLength: 36
+
+    Amount:
+      type: object
+      properties:
+        amount:
+          type: number
+          example: 99.99
+        currency:
+          type: string
+          example: EUR
+          enum:
+            - EUR
+      required:
+        - amount
+        - currency
+      additionalProperties: false
+
+    ShippingMethod:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+        carrier:
+          type: string
+          enum:
+            - UPS
+          example: UPS
+        price:
+          $ref: "#/components/schemas/Amount"
+      example:
+        id: 096c4bf1-fc8d-47f9-b877-038a2ea29898
+        carrier: UPS
+        price:
+          amount: 9.99
+          currency: EUR
+      required:
+        - id
+        - carrier
+        - price
+      additionalProperties: false
+
+    ShippingMethodsResponse:
+      type: array
+      description: A list of shipping methods
+      items:
+        $ref: "#/components/schemas/ShippingMethod"
+
+    BadRequestError:
+      type: object
+      description: An error that is thrown when an the request is invalid
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: The request failed validation
+      additionalProperties: false
+
+    UnexpectedError:
+      type: object
+      description: An error that is thrown when something unexpected happens
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: An unexpected error has occurred
+      additionalProperties: false
+
+    TimeoutError:
+      type: object
+      description: An errors that is thrown when the service times out
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: The request timed out
+      additionalProperties: false
+
+  responses:
+    ShippingMethodsResponse:
+      description: A response containing a list of shipping methods
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ShippingMethodsResponse"
+
+    BadRequestError:
+      description: A response containing an error when the request is invalid
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/BadRequestError"
+
+    UnexpectedError:
+      description: A response containing an error when something unexpected has happened
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UnexpectedError"
+
+    TimeoutError:
+      description: A response containing an error when the request times out
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TimeoutError"
+
+paths:
+  /api/shipping/methods:
+    get:
+      description: Get shipping methods
+      operationId: get-shipping-methods
+      security:
+        - ApiKeyAuth: [ ]
+      responses:
+        "200":
+          $ref: "#/components/responses/ShippingMethodsResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "500":
+          $ref: "#/components/responses/UnexpectedError"
+        "504":
+          $ref: "#/components/responses/TimeoutError"
