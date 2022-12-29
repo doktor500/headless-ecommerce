@@ -29,22 +29,67 @@ components:
       minLength: 1
       maxLength: 36
 
+    Amount:
+      type: object
+      properties:
+        value:
+          type: number
+          example: 99.99
+        currency:
+          type: string
+          example: EUR
+          enum:
+            - EUR
+      required:
+        - value
+        - currency
+      additionalProperties: false
+
     PaymentMethod:
       type: object
       properties:
         id:
           $ref: "#/components/schemas/Id"
+        type:
+          type: string
+          enum:
+            - CARD
       example:
         id: 096c4bf1-fc8d-47f9-b877-038a2ea29898
+        type: CARD
       required:
         - id
+        - type
       additionalProperties: false
 
-    PaymentMethodsResponse:
+    PaymentMethods:
       type: array
       description: A list of payment methods
       items:
         $ref: "#/components/schemas/PaymentMethod"
+
+    Payment:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+        method:
+          $ref: "#/components/schemas/PaymentMethod"
+        amount:
+          $ref: "#/components/schemas/Amount"
+      example:
+        id: c777cc81-d6fc-4df5-a7bb-ba6d97affdcf
+        method:
+          id: 230e2ede-66f2-458a-9280-d73516494a14
+          type: CARD
+        amount:
+          value: 99.99
+          currency: EUR
+      required:
+        - id
+        - method
+        - amount
+      additionalProperties: false
 
     BadRequestError:
       type: object
@@ -80,12 +125,19 @@ components:
       additionalProperties: false
 
   responses:
-    PaymentMethodsResponse:
+    PaymentMethods:
       description: A response containing a list of payment methods
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/PaymentMethodsResponse"
+            $ref: "#/components/schemas/PaymentMethods"
+
+    Payment:
+      description: A response containing a payment
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Payment"
 
     BadRequestError:
       description: A response containing an error when the request is invalid
@@ -117,7 +169,29 @@ paths:
         - ApiKeyAuth: [ ]
       responses:
         "200":
-          $ref: "#/components/responses/PaymentMethodsResponse"
+          $ref: "#/components/responses/PaymentMethods"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "500":
+          $ref: "#/components/responses/UnexpectedError"
+        "504":
+          $ref: "#/components/responses/TimeoutError"
+
+  /api/payment/{paymentId}:
+    get:
+      description: Get Payment
+      operationId: get-payment
+      security:
+        - ApiKeyAuth: [ ]
+      parameters:
+        - in: path
+          name: paymentId
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+      responses:
+        "200":
+          $ref: "#/components/responses/Payment"
         "400":
           $ref: "#/components/responses/BadRequestError"
         "500":

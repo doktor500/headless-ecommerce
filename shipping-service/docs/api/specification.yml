@@ -32,7 +32,7 @@ components:
     Amount:
       type: object
       properties:
-        amount:
+        value:
           type: number
           example: 99.99
         currency:
@@ -41,7 +41,7 @@ components:
           enum:
             - EUR
       required:
-        - amount
+        - value
         - currency
       additionalProperties: false
 
@@ -55,13 +55,13 @@ components:
           enum:
             - UPS
           example: UPS
-        price:
+        amount:
           $ref: "#/components/schemas/Amount"
       example:
         id: 096c4bf1-fc8d-47f9-b877-038a2ea29898
         carrier: UPS
-        price:
-          amount: 9.99
+        amount:
+          value: 9.99
           currency: EUR
       required:
         - id
@@ -69,7 +69,7 @@ components:
         - price
       additionalProperties: false
 
-    ShippingMethodsResponse:
+    ShippingMethods:
       type: array
       description: A list of shipping methods
       items:
@@ -109,12 +109,12 @@ components:
       additionalProperties: false
 
   responses:
-    ShippingMethodsResponse:
+    ShippingMethods:
       description: A response containing a list of shipping methods
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ShippingMethodsResponse"
+            $ref: "#/components/schemas/ShippingMethods"
 
     BadRequestError:
       description: A response containing an error when the request is invalid
@@ -146,7 +146,7 @@ paths:
         - ApiKeyAuth: [ ]
       responses:
         "200":
-          $ref: "#/components/responses/ShippingMethodsResponse"
+          $ref: "#/components/responses/ShippingMethods"
         "400":
           $ref: "#/components/responses/BadRequestError"
         "500":

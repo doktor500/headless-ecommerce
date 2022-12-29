@@ -32,7 +32,7 @@ components:
     Amount:
       type: object
       properties:
-        amount:
+        value:
           type: number
           example: 99.99
         currency:
@@ -41,7 +41,7 @@ components:
           enum:
             - EUR
       required:
-        - amount
+        - value
         - currency
       additionalProperties: false
 
@@ -50,19 +50,20 @@ components:
       properties:
         country:
           type: string
-          example: Spain
         city:
           type: string
-          example: Madrid
         postCode:
           type: string
-          example: "28000"
         line1:
           type: string
-          example: Gran via 1
         line2:
           type: string
-          example: Portal A
+      example:
+        country: Spain
+        city: Madrid
+        postCode: "28000"
+        line1: Gran via 1
+        line2: Portal A
       required:
         - country
         - city
@@ -103,7 +104,7 @@ components:
       items:
         $ref: "#/components/schemas/ShoppingCartItemRequest"
 
-    ShoppingCartResponse:
+    ShoppingCart:
       type: object
       description: A shopping cart
       properties:
@@ -112,28 +113,27 @@ components:
         items:
           type: array
           items:
-            $ref: "#/components/schemas/ShoppingCartItemResponse"
+            $ref: "#/components/schemas/Item"
       example:
         id: aec8b64c-2c49-49cb-8f4c-3b62fb9ce76c
         items:
           - id: cc3cb762-2ccb-4219-b2a9-ad6653d144d2
             quantity: 1
             name: Nike Dunk Low Black and White
-            price:
-              amount: 99.99
+            amount:
+              value: 99.99
               currency: EUR
             tax:
-              amount: 19.99
+              value: 19.99
               currency: EUR
-
       required:
         - id
         - items
       additionalProperties: false
 
-    ShoppingCartItemResponse:
+    Item:
       type: object
-      description: A shopping cart item
+      description: An item
       properties:
         id:
           $ref: "#/components/schemas/Id"
@@ -141,7 +141,7 @@ components:
           type: number
         name:
           type: string
-        price:
+        amount:
           $ref: "#/components/schemas/Amount"
         tax:
           $ref: "#/components/schemas/Amount"
@@ -149,11 +149,11 @@ components:
         id: 5cae5f24-5058-417b-ac9f-68641ed5ad7a
         quantity: 1
         name: Nike Dunk Low Black and White
-        price:
-          amount: 99.99
+        amount:
+          value: 99.99
           currency: EUR
         tax:
-          amount: 19.99
+          value: 19.99
           currency: EUR
       required:
         - id
@@ -161,6 +161,126 @@ components:
         - name
         - price
         - tax
+      additionalProperties: false
+
+    ShippingMethod:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+        carrier:
+          type: string
+          enum:
+            - UPS
+          example: UPS
+        amount:
+          $ref: "#/components/schemas/Amount"
+      example:
+        id: 7b67db0c-2313-42e2-bf4d-512639f967b7
+        carrier: UPS
+        amount:
+          value: 9.99
+          currency: EUR
+      required:
+        - id
+        - carrier
+        - price
+      additionalProperties: false
+
+    PaymentMethod:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+        type:
+          type: string
+          enum:
+            - CARD
+      example:
+        id: 096c4bf1-fc8d-47f9-b877-038a2ea29898
+        type: CARD
+      required:
+        - id
+        - type
+      additionalProperties: false
+
+    Payment:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+        method:
+          $ref: "#/components/schemas/PaymentMethod"
+        amount:
+          $ref: "#/components/schemas/Amount"
+      example:
+        id: c777cc81-d6fc-4df5-a7bb-ba6d97affdcf
+        method:
+          id: 230e2ede-66f2-458a-9280-d73516494a14
+          type: CARD
+        amount:
+          value: 99.99
+          currency: EUR
+      required:
+        - id
+        - method
+        - amount
+      additionalProperties: false
+
+    Order:
+      type: object
+      description: An order
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Item"
+        shippingAddress:
+          $ref: "#/components/schemas/Address"
+        shippingMethod:
+          $ref: "#/components/schemas/ShippingMethod"
+        payment:
+          $ref: "#/components/schemas/Payment"
+      example:
+        id: e0a1c2f6-cb6d-4357-b7ef-66b7534e282a
+        items:
+          - id: de1e26e4-0391-449b-8b97-9fad345b35a7
+            quantity: 1
+            name: Nike Dunk Low Black and White
+            amount:
+              value: 99.99
+              currency: EUR
+            tax:
+              value: 19.99
+              currency: EUR
+        shippingAddress:
+          country: Spain
+          city: Madrid
+          postCode: "28000"
+          line1: Gran via 1
+          line2: Portal A
+        shippingMethod:
+          id: b0f35c39-56a4-40b2-b168-246cefdbef07
+          carrier: UPS
+          amount:
+            value: 9.99
+            currency: EUR
+        payment:
+          id: f7d5d51d-c19b-4cb0-a94a-2a5a6f54fb87
+          method:
+            id: 953c16c3-31a4-4190-a82a-da3da66e6baf
+            type: CARD
+          amount:
+            value: 99.99
+            currency: EUR
+      required:
+        - id
+        - items
+        - shippingAddress
+        - shippingMethod
+        - payment
       additionalProperties: false
 
     BadRequestError:
@@ -200,12 +320,19 @@ components:
     NoContent:
       description: A response containing no content in the response body from a create/delete request
 
-    ShoppingCartResponse:
+    ShoppingCart:
       description: A response containing a shopping cart
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ShoppingCartResponse"
+            $ref: "#/components/schemas/ShoppingCart"
+
+    Order:
+      description: A response containing an order
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Order"
 
     BadRequestError:
       description: A response containing an error when the request is invalid
@@ -242,7 +369,7 @@ paths:
               $ref: "#/components/schemas/ShoppingCartItemsRequest"
       responses:
         "200":
-          $ref: "#/components/responses/ShoppingCartResponse"
+          $ref: "#/components/responses/ShoppingCart"
         "400":
           $ref: "#/components/responses/BadRequestError"
         "500":
@@ -250,14 +377,21 @@ paths:
         "504":
           $ref: "#/components/responses/TimeoutError"
 
+  /api/checkout/cart/{cartId}:
     get:
       description: Get shopping cart
       operationId: get-shopping-cart
       security:
         - ApiKeyAuth: [ ]
+      parameters:
+        - in: path
+          name: cartId
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
       responses:
         "200":
-          $ref: "#/components/responses/ShoppingCartResponse"
+          $ref: "#/components/responses/ShoppingCart"
         "400":
           $ref: "#/components/responses/BadRequestError"
         "500":
@@ -365,6 +499,28 @@ paths:
       responses:
         "204":
           $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "500":
+          $ref: "#/components/responses/UnexpectedError"
+        "504":
+          $ref: "#/components/responses/TimeoutError"
+
+  /api/checkout/orders/{orderId}:
+    get:
+      description: Get order
+      operationId: get-order
+      security:
+        - ApiKeyAuth: [ ]
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+      responses:
+        "200":
+          $ref: "#/components/responses/Order"
         "400":
           $ref: "#/components/responses/BadRequestError"
         "500":
