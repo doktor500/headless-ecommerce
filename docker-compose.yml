@@ -19,3 +19,12 @@ services:
     environment:
       PAGE_TITLE: "Shipping Service API"
       SPEC_URL: api/specification.yml
+  payment-service-api-docs:
+    image: redocly/redoc
+    volumes:
+      - ./payment-service/docs/api:/usr/share/nginx/html/api
+    ports:
+      - "8082:80"
+    environment:
+      PAGE_TITLE: "Payment Service API"
+      SPEC_URL: api/specification.yml

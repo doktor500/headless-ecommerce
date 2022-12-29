@@ -1,0 +1,126 @@
+openapi: 3.0.0
+
+info:
+  title: Payment Service API
+  license:
+    name: Apache 2.0
+    url: www.apache.org/licenses/LICENSE-2.0.html
+  description: An API that exposes payment functionality
+  contact:
+    name: David Molinero
+    url: https://github.com/doktor500
+    email: davidmolinero.com@gmail.com
+  version: 1.0.0
+
+servers:
+  - url: https://api.kenfos.co.uk
+    description: Production environment
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+
+  schemas:
+    Id:
+      type: string
+      minLength: 1
+      maxLength: 36
+
+    PaymentMethod:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+      example:
+        id: 096c4bf1-fc8d-47f9-b877-038a2ea29898
+      required:
+        - id
+      additionalProperties: false
+
+    PaymentMethodsResponse:
+      type: array
+      description: A list of payment methods
+      items:
+        $ref: "#/components/schemas/PaymentMethod"
+
+    BadRequestError:
+      type: object
+      description: An error that is thrown when an the request is invalid
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: The request failed validation
+      additionalProperties: false
+
+    UnexpectedError:
+      type: object
+      description: An error that is thrown when something unexpected happens
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: An unexpected error has occurred
+      additionalProperties: false
+
+    TimeoutError:
+      type: object
+      description: An errors that is thrown when the service times out
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: The request timed out
+      additionalProperties: false
+
+  responses:
+    PaymentMethodsResponse:
+      description: A response containing a list of payment methods
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PaymentMethodsResponse"
+
+    BadRequestError:
+      description: A response containing an error when the request is invalid
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/BadRequestError"
+
+    UnexpectedError:
+      description: A response containing an error when something unexpected has happened
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UnexpectedError"
+
+    TimeoutError:
+      description: A response containing an error when the request times out
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TimeoutError"
+
+paths:
+  /api/payment/methods:
+    get:
+      description: Get payment methods
+      operationId: get-payment-methods
+      security:
+        - ApiKeyAuth: [ ]
+      responses:
+        "200":
+          $ref: "#/components/responses/PaymentMethodsResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "500":
+          $ref: "#/components/responses/UnexpectedError"
+        "504":
+          $ref: "#/components/responses/TimeoutError"

@@ -12,5 +12,18 @@ will need to be bundled in it.
 
 ### API docs
 
-- [Checkout service Api Docs](checkout-service/docs/api/README.md)
-- [Shipping service Api Docs](shipping-service/docs/api/README.md)
+In the root directory of this project execute `docker-compose up -d` to run the docker containers with redoc
+
+Navigate to [localhost:8080](http://localhost:8080) to explore the Checkout Service API documentation
+Navigate to [localhost:8081](http://localhost:8081) to explore the Shipping Service API documentation
+Navigate to [localhost:8081](http://localhost:8082) to explore the Payment Service API documentation
+
+### Notes
+
+Functionality not implemented
+
+- Delete a shopping cart
+- Update or delete a shipping method in the shopping cart
+- Update or delete a payment method in the shopping cart
+- Create, update or delete a shipping method
+- Create, update or delete a payment method
