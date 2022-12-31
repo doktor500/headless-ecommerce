@@ -48,6 +48,10 @@ components:
     Address:
       type: object
       properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
         country:
           type: string
         city:
@@ -59,12 +63,16 @@ components:
         line2:
           type: string
       example:
+        firstName: David
+        lastName: Molinero
         country: Spain
         city: Madrid
         postCode: "28000"
         line1: Gran via 1
         line2: Portal A
       required:
+        - firstName
+        - lastName
         - country
         - city
         - postCode
@@ -86,16 +94,16 @@ components:
       type: object
       description: A shopping cart item
       properties:
-        id:
+        productId:
           $ref: "#/components/schemas/Id"
         quantity:
           type: number
           example: 1
       example:
-        id: c8991868-eb34-4148-bc48-8a19c9294d6b
+        productId: c8991868-eb34-4148-bc48-8a19c9294d6b
         quantity: 1
       required:
-        - id
+        - productId
         - quantity
       additionalProperties: false
 
@@ -118,6 +126,7 @@ components:
         id: aec8b64c-2c49-49cb-8f4c-3b62fb9ce76c
         items:
           - id: cc3cb762-2ccb-4219-b2a9-ad6653d144d2
+            productId: 9ebbd490-e8ef-43df-a470-fe869f3a0806
             quantity: 1
             name: Nike Dunk Low Black and White
             amount:
@@ -137,6 +146,8 @@ components:
       properties:
         id:
           $ref: "#/components/schemas/Id"
+        productId:
+          $ref: "#/components/schemas/Id"
         quantity:
           type: number
         name:
@@ -147,6 +158,7 @@ components:
           $ref: "#/components/schemas/Amount"
       example:
         id: 5cae5f24-5058-417b-ac9f-68641ed5ad7a
+        productId: 89f7762e-1f74-49c5-b3ee-603fde37ef8f
         quantity: 1
         name: Nike Dunk Low Black and White
         amount:
@@ -157,6 +169,7 @@ components:
           currency: EUR
       required:
         - id
+        - productId
         - quantity
         - name
         - amount
@@ -237,16 +250,19 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Item"
-        shippingAddress:
-          $ref: "#/components/schemas/Address"
         shippingMethod:
           $ref: "#/components/schemas/ShippingMethod"
+        shippingAddress:
+          $ref: "#/components/schemas/Address"
+        billingAddress:
+          $ref: "#/components/schemas/Address"
         payment:
           $ref: "#/components/schemas/Payment"
       example:
         id: e0a1c2f6-cb6d-4357-b7ef-66b7534e282a
         items:
           - id: de1e26e4-0391-449b-8b97-9fad345b35a7
+            productId: 21216e21-0c78-47e7-b7f7-d317cf397652
             quantity: 1
             name: Nike Dunk Low Black and White
             amount:
@@ -255,18 +271,28 @@ components:
             tax:
               value: 19.99
               currency: EUR
-        shippingAddress:
-          country: Spain
-          city: Madrid
-          postCode: "28000"
-          line1: Gran via 1
-          line2: Portal A
         shippingMethod:
           id: b0f35c39-56a4-40b2-b168-246cefdbef07
           carrier: UPS
           amount:
             value: 9.99
             currency: EUR
+        shippingAddress:
+          firstName: David
+          lastName: David
+          country: Spain
+          city: Madrid
+          postCode: "28000"
+          line1: Gran via 1
+          line2: Portal A
+        billingAddress:
+          firstName: David
+          lastName: David
+          country: Spain
+          city: Madrid
+          postCode: "28000"
+          line1: Gran via 1
+          line2: Portal A
         payment:
           id: f7d5d51d-c19b-4cb0-a94a-2a5a6f54fb87
           method:
@@ -278,8 +304,9 @@ components:
       required:
         - id
         - items
-        - shippingAddress
         - shippingMethod
+        - shippingAddress
+        - billingAddress
         - payment
       additionalProperties: false
 
@@ -452,6 +479,33 @@ paths:
         "504":
           $ref: "#/components/responses/TimeoutError"
 
+  /api/checkout/cart/{cartId}/shippingMethod:
+    post:
+      description: Add shipping method
+      operationId: add-shipping-method
+      security:
+        - ApiKeyAuth: [ ]
+      parameters:
+        - in: path
+          name: cartId
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShippingMethodRequest"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "500":
+          $ref: "#/components/responses/UnexpectedError"
+        "504":
+          $ref: "#/components/responses/TimeoutError"
+
   /api/checkout/cart/{cartId}/shippingAddress:
     post:
       description: Add shipping address
@@ -479,10 +533,10 @@ paths:
         "504":
           $ref: "#/components/responses/TimeoutError"
 
-  /api/checkout/cart/{cartId}/shippingMethod:
+  /api/checkout/cart/{cartId}/billingAddress:
     post:
-      description: Add shipping method
-      operationId: add-shipping-method
+      description: Add billing address
+      operationId: add-billing-address
       security:
         - ApiKeyAuth: [ ]
       parameters:
@@ -495,7 +549,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ShippingMethodRequest"
+              $ref: "#/components/schemas/Address"
       responses:
         "204":
           $ref: "#/components/responses/NoContent"

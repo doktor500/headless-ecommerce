@@ -1,6 +1,10 @@
 ### C4 Context diagram
 
-![c4-context-diagram.png](resources/c4-context-diagram.png)
+![c4-context-diagram.png](resources/c4-context-diagram.jpg)
+
+### Checkout flow (simplified happy path) sequence diagram
+
+![checkout-flow-sequence-diagram.jpg](resources/checkout-flow-sequence-diagram.jpg)
 
 ### Implementation notes and assumptions
 
@@ -11,6 +15,10 @@
   valid alternative and possibly a better choice depending on different scenarios. A better understanding of the use
   cases would help to make a more informed decision about the right choices
 - API payloads mean to be illustrative and are very basic, they would have to be extended in a real world scenario
+- Depending on the checkout flow, a different set of APIs might become useful to update multiple related properties of 
+  the shopping cart in one call like providing the Shipping method and the Shipping address at once, in situations like
+  this, a GraphQL based API would have some advantages and be more flexible in terms of offering different checkout 
+  flows
 - I've assumed it is OK to use asynchronous integrations via an event bus for activities that can happen in background
 - I've assumed that the payment flow is driven by an in-house payments service but depending on the implementation of
   the external payments provider, the SDK could make direct calls to the payments provider, doing so could have some
@@ -24,7 +32,8 @@
 
 ### Other services that might be required
 
-- A search service might be needed to offer extended search capabilities of products
+- Depending on the complexity an Order Management Service might have to be extracted out from the checkout service
+- A search service might be needed to offer advanced product search capabilities
 - An invoice service might be needed to generate invoices for customers, calculate how to split the margin between
   brands, publishers, etc.
 - A Customer Relationship Management Service might be needed in order to enable marketing communications with customers
@@ -41,7 +50,7 @@
 - Navigate to [localhost:8080](http://localhost:8080) to access Checkout Service API documentation
 - Navigate to [localhost:8081](http://localhost:8081) to access Shipping Service API documentation
 - Navigate to [localhost:8081](http://localhost:8082) to access Payments Service API documentation
-- Execute `docker-compose down` to stop serving the API docs
+- In the root directory of this project execute `docker-compose down` to stop the docker containers with the API docs
 
 ### Other considerations
 
@@ -52,3 +61,4 @@ API endpoints not implemented
 - Update or delete a payment method in the shopping cart
 - Create, update or delete shipping methods
 - Create, update or delete payment methods
+- Product catalog API
