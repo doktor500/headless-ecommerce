@@ -4,7 +4,7 @@ services:
   checkout-service-api-docs:
     image: redocly/redoc
     volumes:
-      - ./checkout-service/docs/api:/usr/share/nginx/html/api
+      - ./services/checkout-service/docs/api:/usr/share/nginx/html/api
     ports:
       - "8080:80"
     environment:
@@ -13,18 +13,18 @@ services:
   shipping-service-api-docs:
     image: redocly/redoc
     volumes:
-      - ./shipping-service/docs/api:/usr/share/nginx/html/api
+      - ./services/shipping-service/docs/api:/usr/share/nginx/html/api
     ports:
       - "8081:80"
     environment:
       PAGE_TITLE: "Shipping Service API"
       SPEC_URL: api/specification.yml
-  payment-service-api-docs:
+  payments-service-api-docs:
     image: redocly/redoc
     volumes:
-      - ./payment-service/docs/api:/usr/share/nginx/html/api
+      - ./services/payments-service/docs/api:/usr/share/nginx/html/api
     ports:
       - "8082:80"
     environment:
-      PAGE_TITLE: "Payment Service API"
+      PAGE_TITLE: "Payments Service API"
       SPEC_URL: api/specification.yml
