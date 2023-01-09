@@ -49,7 +49,7 @@
 - In the root directory of this project execute `docker-compose up -d` to run the docker containers with the API docs
 - Navigate to [localhost:8080](http://localhost:8080) to access Checkout Service API documentation
 - Navigate to [localhost:8081](http://localhost:8081) to access Shipping Service API documentation
-- Navigate to [localhost:8081](http://localhost:8082) to access Payments Service API documentation
+- Navigate to [localhost:8082](http://localhost:8082) to access Payments Service API documentation
 - In the root directory of this project execute `docker-compose down` to stop the docker containers with the API docs
 
 ### Other considerations
